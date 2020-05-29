@@ -6,6 +6,7 @@
   width: 700px;
   height: 500px;
   margin: 10vh auto;
+  position: relative;
 
   form {
 
@@ -20,4 +21,132 @@
       
     }
   }
+}
+
+
+.header-text {
+  position: absolute;
+  top:0;
+  left: 20px;
+}
+
+
+// animation
+
+.animated {
+  animation-timing-function: ease-in-out;
+  animation-duration: 0.7s;
+  animation-iteration-count: 1;
+}
+
+.animation-delay-1 {
+  animation-delay: 1s;
+  -webkit-animation-delay: 1s;
+}
+
+.animation-delay-2 {
+  animation-delay: 2s;
+  -webkit-animation-delay: 2s;
+}
+
+.animation-delay-3 {
+  animation-delay: 3s;
+  -webkit-animation-delay: 3s;
+}
+
+.animation-delay-4 {
+  animation-delay: 4s;
+  -webkit-animation-delay: 4s;
+}
+
+.animation-delay-5 {
+  animation-delay: 5s;
+  -webkit-animation-delay: 5s;
+}
+
+
+.fadeslidein {
+  animation-name: fadeslidein;
+  animation-fill-mode: backwards;
+}
+
+@keyframes fadeslidein {
+  from,
+  0% {visibility: hidden; transform: translate3d(0,100%,0); opacity:0.2; }
+  25% {visibility: visible; opacity:0.3; }
+  50% {opacity:0.5;}
+  75% {opacity:0.7;}
+  100% {visibility: visible; transform: translate3d(0,0,0); opacity:1;
+  }
+}
+
+.fadeenter {
+  animation-name: fadeenter;
+  animation-fill-mode: backwards;
+}
+
+@keyframes fadeenter {
+  from,
+  0% {visibility: hidden; opacity:0.2; }
+  25% {visibility: visible; opacity:0.3; }
+  50% {opacity:0.5;}
+  75% {opacity:0.7;}
+  100% {visibility: visible; opacity:1;
+  }
+}
+
+
+.fadeslideleft {
+  animation-name: fadeslideleft;
+  animation-fill-mode: backwards;
+}
+
+@keyframes fadeslideleft {
+  from,
+  0% {visibility: hidden; transform: translate3d(100%,0,0); opacity:0.2; }
+  25% {visibility: visible; opacity:0.3; }
+  50% {opacity:0.5;}
+  75% {opacity:0.7;}
+  100% {visibility: visible; transform: translate3d(0,0,0); opacity:1;}
+}
+
+.fadeslideright {
+  animation-fill-mode: backwards;
+  animation: fadeslideright 2s ease;
+}
+
+@keyframes fadeslideright {
+  from,
+  0% {visibility: hidden; transform: translate3d(-100%,0,0); opacity:0.2; }
+  25% {visibility: visible; opacity:0.3; }
+  50% {opacity:0.5;}
+  75% {opacity:0.7;}
+  100% {visibility: visible; transform: translate3d(0,0,0); opacity:1;}
+}
+
+
+.reveal {
+  animation-fill-mode: backwards;
+  animation-name: reveal;
+  animation-duration: 1s;
+}
+
+@keyframes reveal {
+  0% {opacity: 0;
+		-webkit-transform: scale(0.9);
+			 -moz-transform: scale(0.9);
+				-ms-transform: scale(0.9);
+				 -o-transform: scale(0.9);
+						transform: scale(0.9);
+		-webkit-transition: all 1s ease-in-out;
+			 -moz-transition: all 1s ease-in-out;
+				-ms-transition: all 1s ease-in-out;
+				 -o-transition: all 1s ease-in-out;
+						transition: all 1s ease-in-out;}
+    100% { opacity: 1;
+		-webkit-transform: none;
+			 -moz-transform: none;
+				-ms-transform: none;
+				 -o-transform: none;
+						transform: none;}
 }
