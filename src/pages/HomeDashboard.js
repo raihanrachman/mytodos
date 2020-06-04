@@ -263,7 +263,7 @@ export default class HomeDashboard extends Component {
     e.preventDefault()
     const token = localStorage.getItem("token")
     const data = new FormData()
-    data.append('name',this.state.tempUserName === "" ? false : this.state.tempUserName)
+    this.state.tempUserName !== "" && data.append('name',this.state.tempUserName)
     data.append('image',this.state.selectedFile)
 
     try {
@@ -289,14 +289,16 @@ export default class HomeDashboard extends Component {
               userImageUrl: res.data.data.url 
             })
             console.log("1")
-          } else if(res.data.data.name === null) {
+          } else if(res.data.data.name === undefined) {
             await this.setState({
               userImageUrl: res.data.data.url 
             })
+            console.log("2")
           } else {
             await this.setState({  
-              userName: this.state.tempUserName
+              userName: res.data.data.name
             })
+            console.log("3")
           } 
         }
         console.log("runn")
