@@ -4,7 +4,6 @@ import {SignButton} from '../components/SignButton'
 import '../assets/styles/SignUp.scss'
 import axios from 'axios';
 import HeaderTodos from '../layout/HeaderTodos'
-import { data } from '../DummyData';
 
 export default class SignUp extends Component {
   state = {
@@ -25,15 +24,12 @@ export default class SignUp extends Component {
   onChange = e => {
     this.setState({
       [e.target.name] : e.target.value,
-      // name: e.target.value,
-      // email: e.target.value
     })
   }
 
 
   onSubmit = async e => {
     e.preventDefault()
-    console.log("run")
     try {
       const res = await axios.post('https://team-g-miniproject.herokuapp.com/api/v1/user/register',{
         name: this.state.name,
@@ -49,8 +45,6 @@ export default class SignUp extends Component {
     } catch(err) {
       console.log(err)
     }
-    
-    console.log(this.state.data)
   }
 
   linkSign = () => {
@@ -59,7 +53,6 @@ export default class SignUp extends Component {
 
   login = async (e) => {
     e.preventDefault()
-    console.log("testrun")
     try {
       const res = await axios({
         method: "POST",
@@ -81,7 +74,6 @@ export default class SignUp extends Component {
   }
 
   render(){
-    console.log(this.props.match.path)
     return (
       <section className="section-wrapper">
         <HeaderTodos headerStyle={"header-sign-style animated reveal animation-delay-2"} />
@@ -99,9 +91,9 @@ export default class SignUp extends Component {
           <section className="main animated fadeslideright animation-delay-1">
             <h1 className="main-title">{this.state.title}</h1>
             <div className="main-icon">
-              <a href=""><i className="fab fa-facebook-f"></i></a>
-              <a href=""><i className="fab fa-google-plus-g"></i></a>
-              <a href=""><i className="fab fa-linkedin-in"></i></a>
+              <a href={"test"}><i className="fab fa-facebook-f"></i></a>
+              <a href={"tets"}><i className="fab fa-google-plus-g"></i></a>
+              <a href={"tets"}><i className="fab fa-linkedin-in"></i></a>
             </div>
 
             <form className="main-form" onSubmit={this.props.match.path === "/signin" ? this.login : this.onSubmit}>
