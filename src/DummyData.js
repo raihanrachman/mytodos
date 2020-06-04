@@ -9,7 +9,7 @@ export const data = [
   {
     id: 2,
     task: "kuterus mandi",
-    isCompleted: false,
+    isCompleted: true,
     isImportant: false,
     isEdit: false
   },
