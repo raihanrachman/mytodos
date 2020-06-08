@@ -19,12 +19,26 @@ export default class HomeDashboard extends Component {
     tempUserName: "",
     isModalActive: false,
     selectedFile: null,
-    idEdited: null
+    idEdited: null,
+    isLoading: false,
+    profileEdit: false,
+    data: this.props.data
   }
 
   validateToken = async () => {
     const token = localStorage.getItem("token")
-    !token && this.props.history.replace("/signin" )
+    !token && this.props.history.replace("/signin")
+    try {
+      await axios.get(`${baseUrl}/tasks`,{
+        headers: {
+          Authorization: token 
+        }
+      })
+    } catch (error) {
+      if(error.response.status === 401){
+        return false
+      }
+    }
   }
 
   getUserProfile = async () => {
@@ -41,9 +55,9 @@ export default class HomeDashboard extends Component {
         await this.setState({userName: res.data.data.userData.Profile.name})
         await this.setState({userImageUrl: res.data.data.userData.Profile.picture})
         this.setState({userId: res.data.data.userData.Profile.id})
-      } 
+      }
     } catch(error) {
-      console.log(error, "error")
+      alert("failed to load profile")
     }
   }
 
@@ -55,23 +69,29 @@ export default class HomeDashboard extends Component {
           Authorization: token 
         }
       })
-      console.log(res.data)
-      await this.setState({  
-        todos: [...res.data.data.tasks]})
-      this.setState({
-        viewTodos: [...this.state.todos],
-        tempTask:""
-      })
-      
+
+      if(res.status === 200){
+        await this.setState({  
+          todos: [...res.data.data.tasks]})
+        await this.setState({
+          viewTodos: [...this.state.todos],
+          tempTask:""
+        })
+      }
     } catch (error) {
-      console.log(error)
+      this.setState({
+        isLoading: false
+      })
     }
   }
 
-  componentDidMount(){
-    this.validateToken()
-    this.getAllTask()
-    this.getUserProfile()
+  async componentDidMount(){
+    this.setState({
+      isLoading: true
+    })
+    await this.validateToken() === false ? this.props.history.replace("/signin") : 
+    this.getAllTask() && this.getUserProfile() && this.setState({isLoading:false})
+    
   }
     
   onChange = e => {
@@ -79,6 +99,7 @@ export default class HomeDashboard extends Component {
       [e.target.name]: e.target.value 
     })
   }
+
 
   signOut = () => {
     localStorage.clear();
@@ -114,13 +135,14 @@ export default class HomeDashboard extends Component {
           },
           data: data
         })
-        if(res.status === 200){
-          await this.getAllTask()
+
+        if(res.status === 200){ 
+          this.getAllTask()
           this.filter()
         }
       }
     } catch (error) {
-      console.log(error,"error")
+      alert("failed")
     } 
   }
 
@@ -140,9 +162,9 @@ export default class HomeDashboard extends Component {
         this.filter()
       } 
     } catch(error) {
-      console.log(error, "error")
     } 
   }
+
 
   findTodo = id => {
     const found = this.state.todos.find( todo => todo.id === id)
@@ -153,7 +175,6 @@ export default class HomeDashboard extends Component {
     const token = localStorage.getItem("token")
     const data = this.findTodo(id)
     const dataImportance = !data.importance
-    console.log(data)
     try {
       const res = await axios({
         method: "PUT",
@@ -163,7 +184,6 @@ export default class HomeDashboard extends Component {
         },
         data: {importance: dataImportance}
       })
-      console.log(res.data)
       if (res.data.status === "success") {
         await this.setState({
           todos: this.state.todos.map( todo => 
@@ -173,7 +193,7 @@ export default class HomeDashboard extends Component {
         this.filter()
       } 
     } catch(error) {
-      console.log(error, "error")
+  
     }   
   }
 
@@ -199,18 +219,20 @@ export default class HomeDashboard extends Component {
         this.filter()
       } 
     } catch(error) {
-      console.log(error, "error")
+
     }   
    }
 
   showImportant = async () => {
     await this.setState({showImportant: !this.state.showImportant})
     this.filter()
+
   }
 
   showCompleted = async () => {
     await this.setState({showCompleted: !this.state.showCompleted})
     this.filter()
+
   }
 
   showAll = async () => {
@@ -221,6 +243,7 @@ export default class HomeDashboard extends Component {
       showImportant: false,
       showCompleted: false,
     })
+  
   }
 
   onChangeFile = e => {
@@ -229,47 +252,66 @@ export default class HomeDashboard extends Component {
     })
   }
 
-  profileUpdateSubmit = async (e) => {
+  profileUpdateSubmit = async e => {
     e.preventDefault()
     const token = localStorage.getItem("token")
     const data = new FormData()
     this.state.tempUserName !== "" && data.append('name',this.state.tempUserName)
     data.append('image',this.state.selectedFile)
+    this.setState({isLoading: true})
 
     try {
       if(this.state.selectedFile === null && this.state.tempUserName === "") {
         alert("why empty dude?")
+        this.setState({isLoading: false})
       } else {
-        console.log("run")
+
         const res = await axios({
           method:"PUT",
-          url: `${baseUrl}/user/${this.state.userId}`, 
+          url: `${baseUrl}/user`, 
           headers: {
             Authorization: token
           },
           data: data
         })
 
+
         if(res.status === 200){
-          if(res.data.data.url === true && res.data.data.name === true ){
+          if(res.data.data.url !== undefined  && res.data.data.name !== undefined  ){
             await this.setState({  
               userName: res.data.data.name,
-              userImageUrl: res.data.data.url 
+              userImageUrl: res.data.data.url,
+              profileEdit: false,
+              isLoading: false
             })
+        
           } else if(res.data.data.name === undefined) {
             await this.setState({
-              userImageUrl: res.data.data.url 
+              userImageUrl: res.data.data.url ,
+              isLoading: false,
+              profileEdit: false,
             })
+          
           } else {
             await this.setState({  
-              userName: res.data.data.name
+              userName: res.data.data.name,
+              isLoading: false,
+              profileEdit: false,
             })
           } 
         }
+  
       }
     } catch (error) {
-      console.log(error,"error")
+
+      this.setState({isLoading: false})
     } 
+  }
+
+  getId = id => {
+    this.setState({
+      idEdited: id,
+    })
   }
 
   toggleEdit = async id => {
@@ -278,7 +320,7 @@ export default class HomeDashboard extends Component {
         tempEdit: "",
         idEdited: id,
         isModalActive: !this.state.isModalActive,
-        })
+      })
     } else if(this.state.idEdited === null) {
       await this.setState({
         tempEdit: "",
@@ -292,7 +334,7 @@ export default class HomeDashboard extends Component {
         isModalActive: true,
       })
     }
-    console.log(this.state.idEdited,this.state.isModalActive)
+
   }
 
   editSubmit = async e => {
@@ -321,48 +363,75 @@ export default class HomeDashboard extends Component {
             ),
             isModalActive: false
           })
-          
           this.filter()
         }
       }
     } catch(error) {
-      console.log(error,"error")
+ 
     }
   }
   
   modal = (params,name) => {
     if(this.state.isModalActive && this.state.idEdited === params) {
       return ( 
-        <form onSubmit={this.editSubmit}>
-          <input autoFocus style={{width:240}} className="input-text-edit" onChange={this.onChange} name="tempEdit" value={this.state.tempEdit}  type="text"/>
-        </form>
+        <input autoFocus className="input-text-edit" onChange={this.onChange} name="tempEdit" value={this.state.tempEdit}  type="text"/>
       )
-
     } else {
       return (<p className="task-name">{name}</p>)
     }
   }
 
+  profileEditModal = () => {
+   if (this.state.profileEdit) {
+     return (
+      <form className="modal-profile animated reveal" action="" onSubmit={this.profileUpdateSubmit}>
+        <div className="input-username-wrapper">
+          <label className="label-username" htmlFor="tempUserName">Full Name</label>
+          <input autoFocus className="input-username" onChange={this.onChange} value={this.state.tempUserName} name="tempUserName"  type="text"/>
+        </div>
+        <input className="input-userimage" onChange={this.onChangeFile} type="file" name="selectedFile" id=""/> 
+        <div className="button-wrapper">
+          {this.state.isLoading ? <button className="button-username"><i className="fas fa-spinner fa-spin"></i></button> : <button className="button-username">SEND</button>}
+          <p onClick={this.toggleProfileEdit} className="cancel-edit-profile">Cancel</p>
+        </div>
+      </form> 
+     )
+   } 
+  }
+
+  editClass = id =>{
+   if(this.state.isModalActive && this.state.idEdited === id) {
+    return "fas fa-times"
+   } else {
+     return "fas fa-edit"
+   }
+  }
+
+  toggleProfileEdit = ()=> {
+    this.setState({profileEdit : !this.state.profileEdit})
+  }
+
   render() {
     return (
-      <section className="section-wrapper animated reveal">
+        <>
+        {this.profileEditModal()}
+        {this.state.profileEdit ? "" : this.state.isLoading ? <div><i className="fas fa-spinner fa-spin center"> LOADING</i></div> : 
+        (<section className="section-wrapper animated reveal">
         <HeaderTodos signOut ={this.signOut} headerStyle={"header-style-dashboard white"}/>
         <section className="home-dashboard-wrapper flex">
           <section className="profile">
             <div className="profile-user flex">
-              
+
+            
               <div className="profile-user_image">
                 <img src={this.state.userImageUrl === null ? require("../assets/images/user.svg"): this.state.userImageUrl} alt=""/>
               </div>
               <div className="profile-user_name">
-                {this.state.userName}
+                <p>{this.state.userName}</p>
+                  <div className="profile-edit">
+                    <p onClick={this.toggleProfileEdit}>Edit Profile</p>
+                  </div>
               </div>
-              <form action="" onSubmit={this.profileUpdateSubmit}>
-                <input onChange={this.onChangeFile} type="file" name="selectedFile" id=""/>
-                <input onChange={this.onChange} value={this.state.tempUserName} name="tempUserName" placeholder="kimi no nawa" type="text"/>
-                <button>send nudes</button>
-                <p>cancel</p>
-              </form>
             
             </div>
             <div className="profile-filter">
@@ -370,6 +439,7 @@ export default class HomeDashboard extends Component {
               <p className={this.state.showImportant && "red"} onClick={this.showImportant}><i className="fas fa-star"></i>Important</p>
               <p className={this.state.showCompleted && "red"} onClick={this.showCompleted}><i className="fas fa-check-double"></i>Completed</p>
             </div>
+            
           </section>
           
           <section className="todos">
@@ -390,11 +460,17 @@ export default class HomeDashboard extends Component {
                 {this.state.viewTodos.map( todo => {
                   return(
                     <div className="todo flex" key={todo.id}>
-                      <input className="input-checkbox" type="checkbox" onChange={()=>this.toggleCompleted(todo.id)} checked={todo.completed} name={todo.id} id=""/>
-                      {this.modal(todo.id,todo.name)}
-                      <i onClick={()=>this.toggleImportant(todo.id)} className={todo.importance ? "fas fa-star" : "far fa-star"}></i>
-                      <i onClick={()=>this.toggleEdit(todo.id)} className="fas fa-edit"></i>
-                      <i onClick={()=>this.delTodo(todo.id)} className="fas fa-trash-alt"></i>
+                      <div>
+                        <input className="input-checkbox" type="checkbox" onChange={()=>this.toggleCompleted(todo.id)} checked={todo.completed} name={todo.id} id=""/>
+                      </div>
+                      <form className="input-text-edit-wrapper" onSubmit={this.editSubmit}>
+                        {this.modal(todo.id,todo.name)}
+                      </form>
+                      <div className="icon-wrapper">
+                        <i onClick={()=>this.toggleImportant(todo.id)} className={todo.importance ? "fas fa-star" : "far fa-star"}></i>
+                        <i onClick={()=>this.toggleEdit(todo.id)} className={this.editClass(todo.id)}></i>
+                        <i onClick={()=>this.delTodo(todo.id)} className="fas fa-trash-alt"></i>
+                      </div>
                     </div>
                   )
                 } )}
@@ -402,7 +478,9 @@ export default class HomeDashboard extends Component {
             </section>
           </section>
         </section>
-      </section>
+      </section>)}
+        </>
+      
     )
   }
 }

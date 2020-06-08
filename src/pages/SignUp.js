@@ -4,8 +4,9 @@ import {SignButton} from '../components/SignButton'
 import '../assets/styles/SignUp.scss'
 import axios from 'axios';
 import HeaderTodos from '../layout/HeaderTodos'
+import { withRouter } from "react-router";
 
-export default class SignUp extends Component {
+class SignUp extends Component {
   state = {
     title: this.props.match.path === "/signin" ? "Sign in to Task Manager":"Create Account",
     greet: this.props.match.path === "/signin" ? "Hello There !" : "Welcome Back !",
@@ -18,18 +19,22 @@ export default class SignUp extends Component {
     password: "",
     isLoading: false,
     token:"",
-    data:{}
+    data:{},
+    userName: null,
+    userProfileImage: null
   }
 
   onChange = e => {
     this.setState({
-      [e.target.name] : e.target.value,
+      [e.target.name] : e.target.value
     })
   }
 
-
   onSubmit = async e => {
     e.preventDefault()
+    this.setState({
+    isLoading: true
+    })
     try {
       const res = await axios.post('https://team-g-miniproject.herokuapp.com/api/v1/user/register',{
         name: this.state.name,
@@ -37,22 +42,38 @@ export default class SignUp extends Component {
         password: this.state.password
       })
       if (res.data.status === "success") {
-        this.setState({data: this.state.data})
-        localStorage.setItem("token", res.data.token)
-        this.props.history.push("/dashboard")
+        this.setState({
+          name: "",
+          email: "",
+          password: ""
+        })
+        this.setState({
+          isLoading: false
+        })
+        localStorage.setItem("token", res.data.data.token)
+        this.props.history.push({
+          pathname: "/dashboard",
+          state:{
+            data: res.data
+          } 
+        })
+        
       }
-    
-    } catch(err) {
-      console.log(err)
+    } catch(error) {
+
+      this.setState({
+        isLoading: false
+      })
+      alert('error')
     }
   }
 
-  linkSign = () => {
-    this.props.match.path === "/signin" ? this.props.history.push("/") : this.props.history.push("/signin")
-  }
 
-  login = async (e) => {
+  login = async e => {
     e.preventDefault()
+    this.setState({
+      isLoading: true
+    })
     try {
       const res = await axios({
         method: "POST",
@@ -63,17 +84,32 @@ export default class SignUp extends Component {
         }
       })
       if (res.data.status === "success") {
+        this.setState({
+          email: "",
+          password: ""
+        })
+        this.setState({
+          isLoading: false
+        })
         this.setState({data: res.data})
+      
         localStorage.setItem("token", this.state.data.data.token)
-        this.props.history.push("/dashboard")
-        console.log(res.data, localStorage.getItem("token"))
-      }
-    } catch {
-      console.log("nice")
+        this.props.history.push({
+          pathname: "/dashboard",
+          state:{
+            data: this.state.data
+          } 
+        })
+      } 
+    } catch(error) {
+      this.setState({
+        isLoading: false
+      })
+      alert(error.response.data.message)
     }
   }
-
   render(){
+
     return (
       <section className="section-wrapper">
         <HeaderTodos headerStyle={"header-sign-style animated reveal animation-delay-2"} />
@@ -91,9 +127,9 @@ export default class SignUp extends Component {
           <section className="main animated fadeslideright animation-delay-1">
             <h1 className="main-title">{this.state.title}</h1>
             <div className="main-icon">
-              <a href={"test"}><i className="fab fa-facebook-f"></i></a>
-              <a href={"tets"}><i className="fab fa-google-plus-g"></i></a>
-              <a href={"tets"}><i className="fab fa-linkedin-in"></i></a>
+              <a href={"tes"}><i className="fab fa-facebook-f"></i></a>
+              <a href={"tes"}><i className="fab fa-google-plus-g"></i></a>
+              <a href={"tes"}><i className="fab fa-linkedin-in"></i></a>
             </div>
 
             <form className="main-form" onSubmit={this.props.match.path === "/signin" ? this.login : this.onSubmit}>
@@ -104,14 +140,14 @@ export default class SignUp extends Component {
                 <input required onChange={this.onChange} type="email" name="email" id="input-email"  placeholder="Email" value={this.state.email}/>
                 <input required onChange={this.onChange} type="password" name="password" id="input-password"  placeholder="Password" value={this.state.password}/>
               </div>
-              <SignButton buttonStyle={"button-sign-style white"}  buttonText = {this.state.buttonForm}/>
+              <SignButton isLoading={this.state.isLoading} buttonStyle={"button-sign-style white"}  buttonText = {this.state.isLoading ? <i className="fas fa-spinner fa-spin"></i> : this.state.buttonForm}/>
             </form>
 
           </section>
-          
         </section>
       </section>
     )
   }
 }
 
+export default withRouter(SignUp);

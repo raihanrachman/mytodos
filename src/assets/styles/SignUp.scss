@@ -39,6 +39,7 @@ $border-color: linear-gradient(180deg, rgba(23,65,113,1) 0%, rgba(20,111,150,1) 
 }
 
 .button-sign-style {
+  width: 120px;
   background: #164172;
   border: 1px white solid;
   border-radius: 50px;
@@ -55,10 +56,6 @@ $border-color: linear-gradient(180deg, rgba(23,65,113,1) 0%, rgba(20,111,150,1) 
     top: 0;
     box-shadow: none;
   }
-  // &:focus {
-    
-  // }
-
 }
 
 
@@ -178,8 +175,6 @@ $border-color: linear-gradient(180deg, rgba(23,65,113,1) 0%, rgba(20,111,150,1) 
     }
   }
   }
-  
-
 
 .header-wrapper {
   width: 100%;
